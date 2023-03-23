@@ -792,13 +792,11 @@ static const BuiltinScript builtin_script[] =
 		"\\set bid random(1, " CppAsString2(nbranches) " * :scale)\n"
 		"\\set tid random(1, " CppAsString2(ntellers) " * :scale)\n"
 		"\\set delta random(-5000, 5000)\n"
-		"BEGIN;\n"
 		"UPDATE pgbench_accounts SET abalance = abalance + :delta WHERE aid = :aid;\n"
 		"SELECT abalance FROM pgbench_accounts WHERE aid = :aid;\n"
 		"UPDATE pgbench_tellers SET tbalance = tbalance + :delta WHERE tid = :tid;\n"
 		"UPDATE pgbench_branches SET bbalance = bbalance + :delta WHERE bid = :bid;\n"
 		"INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES (:tid, :bid, :aid, :delta, CURRENT_TIMESTAMP);\n"
-		"END;\n"
 	},
 	{
 		"simple-update",
@@ -807,11 +805,9 @@ static const BuiltinScript builtin_script[] =
 		"\\set bid random(1, " CppAsString2(nbranches) " * :scale)\n"
 		"\\set tid random(1, " CppAsString2(ntellers) " * :scale)\n"
 		"\\set delta random(-5000, 5000)\n"
-		"BEGIN;\n"
 		"UPDATE pgbench_accounts SET abalance = abalance + :delta WHERE aid = :aid;\n"
 		"SELECT abalance FROM pgbench_accounts WHERE aid = :aid;\n"
 		"INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES (:tid, :bid, :aid, :delta, CURRENT_TIMESTAMP);\n"
-		"END;\n"
 	},
 	{
 		"select-only",
@@ -4745,7 +4741,7 @@ createPartitions(PGconn *con)
 		 * Per ddlinfo in initCreateTables, fillfactor is needed on table
 		 * pgbench_accounts.
 		 */
-		appendPQExpBuffer(&query, " with (fillfactor=%d)", fillfactor);
+		//appendPQExpBuffer(&query, " with (fillfactor=%d)", fillfactor);
 
 		executeStatement(con, query.data);
 	}
@@ -4824,11 +4820,11 @@ initCreateTables(PGconn *con)
 		if (partition_method != PART_NONE && strcmp(ddl->table, "pgbench_accounts") == 0)
 			appendPQExpBuffer(&query,
 							  " partition by %s (aid)", PARTITION_METHOD[partition_method]);
-		else if (ddl->declare_fillfactor)
-		{
-			/* fillfactor is only expected on actual tables */
-			appendPQExpBuffer(&query, " with (fillfactor=%d)", fillfactor);
-		}
+		//else if (ddl->declare_fillfactor)
+		//{
+		//	/* fillfactor is only expected on actual tables */
+		//	appendPQExpBuffer(&query, " with (fillfactor=%d)", fillfactor);
+		//}
 
 		if (tablespace != NULL)
 		{
@@ -4854,11 +4850,12 @@ initCreateTables(PGconn *con)
 static void
 initTruncateTables(PGconn *con)
 {
-	executeStatement(con, "truncate table "
-					 "pgbench_accounts, "
-					 "pgbench_branches, "
-					 "pgbench_history, "
-					 "pgbench_tellers");
+	executeStatement(con, "commit");
+	executeStatement(con, "delete from pgbench_accounts");
+	executeStatement(con, "delete from pgbench_branches");
+	executeStatement(con, "delete from pgbench_history");
+	executeStatement(con, "delete from pgbench_tellers");
+	executeStatement(con, "begin");
 }
 
 /*
@@ -4893,6 +4890,8 @@ initGenerateDataClientSide(PGconn *con)
 
 	initPQExpBuffer(&sql);
 
+	executeStatement(con, "commit");
+	executeStatement(con, "begin");
 	/*
 	 * fill branches, tellers, accounts in that order in case foreign keys
 	 * already exist
@@ -4906,6 +4905,8 @@ initGenerateDataClientSide(PGconn *con)
 		executeStatement(con, sql.data);
 	}
 
+	executeStatement(con, "commit");
+	executeStatement(con, "begin");
 	for (i = 0; i < ntellers * scale; i++)
 	{
 		/* "filler" column defaults to NULL */
@@ -4920,6 +4921,8 @@ initGenerateDataClientSide(PGconn *con)
 	 */
 
 	/* use COPY with FREEZE on v14 and later without partitioning */
+	executeStatement(con, "commit");
+	executeStatement(con, "begin");
 	if (partitions == 0 && PQserverVersion(con) >= 140000)
 		copy_statement = "copy pgbench_accounts from stdin with (freeze on)";
 	else
@@ -5049,10 +5052,10 @@ static void
 initVacuum(PGconn *con)
 {
 	fprintf(stderr, "vacuuming...\n");
-	executeStatement(con, "vacuum analyze pgbench_branches");
-	executeStatement(con, "vacuum analyze pgbench_tellers");
-	executeStatement(con, "vacuum analyze pgbench_accounts");
-	executeStatement(con, "vacuum analyze pgbench_history");
+	//executeStatement(con, "vacuum analyze pgbench_branches");
+	//executeStatement(con, "vacuum analyze pgbench_tellers");
+	//executeStatement(con, "vacuum analyze pgbench_accounts");
+	//executeStatement(con, "vacuum analyze pgbench_history");
 }
 
 /*
@@ -5070,27 +5073,27 @@ initCreatePKeys(PGconn *con)
 	PQExpBufferData query;
 
 	fprintf(stderr, "creating primary keys...\n");
-	initPQExpBuffer(&query);
+	//initPQExpBuffer(&query);
 
-	for (i = 0; i < lengthof(DDLINDEXes); i++)
-	{
-		resetPQExpBuffer(&query);
-		appendPQExpBufferStr(&query, DDLINDEXes[i]);
+	//for (i = 0; i < lengthof(DDLINDEXes); i++)
+	//{
+	//	resetPQExpBuffer(&query);
+	//	appendPQExpBufferStr(&query, DDLINDEXes[i]);
 
-		if (index_tablespace != NULL)
-		{
-			char	   *escape_tablespace;
+	//	if (index_tablespace != NULL)
+	//	{
+	//		char	   *escape_tablespace;
 
-			escape_tablespace = PQescapeIdentifier(con, index_tablespace,
-												   strlen(index_tablespace));
-			appendPQExpBuffer(&query, " using index tablespace %s", escape_tablespace);
-			PQfreemem(escape_tablespace);
-		}
+	//		escape_tablespace = PQescapeIdentifier(con, index_tablespace,
+	//											   strlen(index_tablespace));
+	//		appendPQExpBuffer(&query, " using index tablespace %s", escape_tablespace);
+	//		PQfreemem(escape_tablespace);
+	//	}
 
-		executeStatement(con, query.data);
-	}
+	//	executeStatement(con, query.data);
+	//}
 
-	termPQExpBuffer(&query);
+	//termPQExpBuffer(&query);
 }
 
 /*

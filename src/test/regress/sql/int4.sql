@@ -120,11 +120,11 @@ SELECT ((-1::int4<<31)+1)::text;
 
 -- check sane handling of INT_MIN overflow cases
 SELECT (-2147483648)::int4 * (-1)::int4;
---SELECT (-2147483648)::int4 / (-1)::int4;
---SELECT (-2147483648)::int4 % (-1)::int4;
+SELECT (-2147483648)::int4 / (-1)::int4;
+SELECT (-2147483648)::int4 % (-1)::int4;
 SELECT (-2147483648)::int4 * (-1)::int2;
---SELECT (-2147483648)::int4 / (-1)::int2;
---SELECT (-2147483648)::int4 % (-1)::int2;
+SELECT (-2147483648)::int4 / (-1)::int2;
+SELECT (-2147483648)::int4 % (-1)::int2;
 
 -- check rounding when casting from float
 SELECT x, x::int4 AS int4_value

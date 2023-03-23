@@ -198,14 +198,14 @@ SELECT ((-1::int8<<63)+1)::text;
 
 -- check sane handling of INT64_MIN overflow cases
 SELECT (-9223372036854775808)::int8 * (-1)::int8;
---SELECT (-9223372036854775808)::int8 / (-1)::int8;
---SELECT (-9223372036854775808)::int8 % (-1)::int8;
+SELECT (-9223372036854775808)::int8 / (-1)::int8;
+SELECT (-9223372036854775808)::int8 % (-1)::int8;
 SELECT (-9223372036854775808)::int8 * (-1)::int4;
---SELECT (-9223372036854775808)::int8 / (-1)::int4;
---SELECT (-9223372036854775808)::int8 % (-1)::int4;
+SELECT (-9223372036854775808)::int8 / (-1)::int4;
+SELECT (-9223372036854775808)::int8 % (-1)::int4;
 SELECT (-9223372036854775808)::int8 * (-1)::int2;
---SELECT (-9223372036854775808)::int8 / (-1)::int2;
---SELECT (-9223372036854775808)::int8 % (-1)::int2;
+SELECT (-9223372036854775808)::int8 / (-1)::int2;
+SELECT (-9223372036854775808)::int8 % (-1)::int2;
 
 -- check rounding when casting from float
 SELECT x, x::int8 AS int8_value

@@ -93,8 +93,8 @@ SELECT ((-1::int2<<15)+1::int2)::text;
 
 -- check sane handling of INT16_MIN overflow cases
 SELECT (-32768)::int2 * (-1)::int2;
---SELECT (-32768)::int2 / (-1)::int2;
---SELECT (-32768)::int2 % (-1)::int2;
+SELECT (-32768)::int2 / (-1)::int2;
+SELECT (-32768)::int2 % (-1)::int2;
 
 -- check rounding when casting from float
 SELECT x, x::int2 AS int2_value

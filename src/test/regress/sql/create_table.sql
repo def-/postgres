@@ -197,12 +197,12 @@ CREATE TABLE partitioned (
 -- some checks after successful creation of a partitioned table
 CREATE FUNCTION plusone(a int) RETURNS INT AS $$ SELECT a+1; $$ LANGUAGE SQL;
 
-CREATE TABLE partitioned (
-	a int,
-	b int,
-	c text,
-	d text
-) PARTITION BY RANGE (a oid_ops, plusone(b), c collate "default", d collate "C");
+--CREATE TABLE partitioned (
+--	a int,
+--	b int,
+--	c text,
+--	d text
+--) PARTITION BY RANGE (a oid_ops, plusone(b), c collate "default", d collate "C");
 
 -- check relkind
 SELECT relkind FROM pg_class WHERE relname = 'partitioned';

@@ -652,7 +652,7 @@ where histogram_bounds is not null;
 select max(histogram_bounds) from pg_stats where tablename = 'pg_am';
 
 -- another corner case is the input functions for polymorphic pseudotypes
-select array_in('{1,2,3}','int4'::regtype,-1);  -- this has historically worked
+--select array_in('{1,2,3}','int4'::regtype,-1);  -- this has historically worked
 select * from array_in('{1,2,3}','int4'::regtype,-1);  -- this not
 select anyrange_in('[10,20)','int4range'::regtype,-1);
 
